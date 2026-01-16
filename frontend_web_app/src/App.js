@@ -1,48 +1,57 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import "./App.css";
+
+import { AuthProvider } from "./context/AuthContext";
+import { UIProvider, useUI } from "./context/UIContext";
+
+import ProtectedRoute from "./routes/ProtectedRoute";
+import DashboardLayout from "./layouts/DashboardLayout";
+
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import ProjectsPage from "./pages/ProjectsPage";
+import UsersPage from "./pages/UsersPage";
+import RolesPage from "./pages/RolesPage";
+
+import ToastViewport from "./components/ToastViewport";
+
+function GlobalLoadingBar() {
+  const { globalLoading } = useUI();
+  return globalLoading ? <div className="loading-bar" aria-hidden="true" /> : null;
+}
 
 // PUBLIC_INTERFACE
 function App() {
-  const [theme, setTheme] = useState('light');
-
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
+  /** This is a public function. */
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <UIProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <GlobalLoadingBar />
+          <ToastViewport />
+
+          <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* Protected app */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<DashboardLayout />}>
+                <Route path="/projects" element={<ProjectsPage />} />
+                <Route path="/users" element={<UsersPage />} />
+                <Route path="/roles" element={<RolesPage />} />
+                <Route path="/" element={<Navigate to="/projects" replace />} />
+              </Route>
+            </Route>
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </UIProvider>
   );
 }
 
