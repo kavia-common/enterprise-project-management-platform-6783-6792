@@ -1,0 +1,4 @@
+{
+    "command": "npm run test",
+    "working_directory": "/home/kavia/workspace/code-generation/enterprise-project-management-platform-6783-6792/frontend_web_app"
+}
